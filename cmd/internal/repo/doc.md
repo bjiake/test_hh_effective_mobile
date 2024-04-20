@@ -1,0 +1,2 @@
+### Migrate
+Migrate(ctx context.Context) error - The method responsible for migrating the repository, i.e., adjusting the PostgreSQL table to the domain object and importing the initial data. In our case, this function will be responsible for creating a new websites table. So there is no need to log into the GUI database client and manually create the table. However, it is important to remember that this function should be executed first, before reading or writing to the database. 
