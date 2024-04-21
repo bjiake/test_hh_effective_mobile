@@ -20,12 +20,16 @@ func RunCarRepositoryDemo(ctx context.Context, carRepository car.PgSQLCarReposit
 
 	fmt.Println("2. CREATE RECORDS OF REPOSITORY")
 	carSample1 := model.Car{
-		RegNum: "REGNUM",
+		RegNum: "Я111XX243",
 		Mark:   "https://gosamples.dev",
 		Model:  "Vesta",
 		Year:   2002,
 		Owner:  1,
 	}
+	if err := carSample1.Validate(); err != nil {
+		log.Println(err.Error())
+	}
+
 	carSample2 := model.Car{
 		RegNum: "SAMPLE",
 		Mark:   "https://gosamples.dev",
@@ -50,7 +54,7 @@ func RunCarRepositoryDemo(ctx context.Context, carRepository car.PgSQLCarReposit
 	fmt.Printf("%+v\n%+v\n", createdGosamples, createdGolang)
 
 	fmt.Println("3. GET RECORD BY ID")
-	gotGosamples, err := carRepository.GetByID(ctx, 2)
+	gotGosamples, err := carRepository.GetByID(ctx, 1)
 	if errors.Is(err, repo.ErrNotExist) {
 		log.Println("record: GOSAMPLES does not exist in the repository")
 	} else if err != nil {

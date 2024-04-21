@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"github.com/jackc/pgconn"
 	"hh.ru/cmd/internal/model"
-	"hh.ru/cmd/internal/repo"
+	"hh.ru/pkg/db"
 	"log"
 )
 
@@ -43,9 +43,9 @@ func (r *PgSQLCarRepository) Migrate(ctx context.Context) error {
     `
 	_, err := r.db.ExecContext(ctx, carQuery)
 	if err != nil {
-		message := repo.ErrMigrate.Error() + " car"
+		message := db.ErrMigrate.Error() + " car"
 		log.Printf("%q: %s\n", message, err.Error())
-		return repo.ErrMigrate
+		return db.ErrMigrate
 	}
 
 	return err
@@ -58,7 +58,7 @@ func (r *PgSQLCarRepository) Create(ctx context.Context, car model.Car) (*model.
 		var pgxError *pgconn.PgError
 		if errors.As(err, &pgxError) {
 			if pgxError.Code == "23505" {
-				return nil, repo.ErrDuplicate
+				return nil, db.ErrDuplicate
 			}
 		}
 		return nil, err
@@ -92,7 +92,7 @@ func (r *PgSQLCarRepository) GetByID(ctx context.Context, id int64) (*model.Car,
 	var car model.Car
 	if err := row.Scan(&car.ID, &car.RegNum, &car.Mark, &car.Model, &car.Year, &car.Owner); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, repo.ErrNotExist
+			return nil, db.ErrNotExist
 		}
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func (r *PgSQLCarRepository) Update(ctx context.Context, id int64, updatedCar mo
 		var pgxError *pgconn.PgError
 		if errors.As(err, &pgxError) {
 			if pgxError.Code == "23505" {
-				return nil, repo.ErrDuplicate
+				return nil, db.ErrDuplicate
 			}
 		}
 		return nil, err
@@ -117,7 +117,7 @@ func (r *PgSQLCarRepository) Update(ctx context.Context, id int64, updatedCar mo
 	}
 
 	if rowsAffected == 0 {
-		return nil, repo.ErrUpdateFailed
+		return nil, db.ErrUpdateFailed
 	}
 
 	return &updatedCar, nil
@@ -135,7 +135,7 @@ func (r *PgSQLCarRepository) Delete(ctx context.Context, id int64) error {
 	}
 
 	if rowsAffected == 0 {
-		return repo.ErrDeleteFailed
+		return db.ErrDeleteFailed
 	}
 
 	return err
