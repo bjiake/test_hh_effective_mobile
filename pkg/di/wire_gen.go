@@ -1,11 +1,13 @@
 package di
 
 import (
-	"hh.ru/cmd/internal/repo/car"
-	"hh.ru/cmd/internal/repo/people"
-	"hh.ru/cmd/internal/service"
+	http "hh.ru/pkg/api"
+	"hh.ru/pkg/api/handler"
 	"hh.ru/pkg/config"
 	"hh.ru/pkg/db"
+	"hh.ru/pkg/repo/car"
+	"hh.ru/pkg/repo/people"
+	"hh.ru/pkg/service"
 )
 
 func InitializeAPI(cfg config.Config) (*http.ServerHTTP, error) {
@@ -13,9 +15,10 @@ func InitializeAPI(cfg config.Config) (*http.ServerHTTP, error) {
 	if err != nil {
 		return nil, err
 	}
-	userService := service.NewService(car.NewPgSqlCarRepository(bd), people.NewPgSqlPeopleRepository(bd))
-	userUseCase := usecase.NewUserUseCase(userService)
-	userHandler := handler.NewUserHandler(userUseCase)
+	carRepository := car.NewCarRepository(bd)
+	peopleRepository := people.NewPeopleRepository(bd)
+	userService := service.NewService(carRepository, peopleRepository)
+	userHandler := handler.NewHandler(userService)
 	serverHTTP := http.NewServerHTTP(userHandler)
 	return serverHTTP, nil
 }

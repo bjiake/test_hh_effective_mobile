@@ -5,31 +5,23 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/jackc/pgconn"
-	"hh.ru/cmd/internal/model"
 	"hh.ru/pkg/db"
+	"hh.ru/pkg/domain"
+	"hh.ru/pkg/repo/people/interface"
 	"log"
 )
 
-type PgSQLPeopleRepository struct {
+type peopleDatabase struct {
 	db *sql.DB
 }
 
-func NewPgSqlPeopleRepository(db *sql.DB) *PgSQLPeopleRepository {
-	return &PgSQLPeopleRepository{
+func NewPeopleRepository(db *sql.DB) interfaces.PeopleRepository {
+	return &peopleDatabase{
 		db: db,
 	}
 }
 
-type RepositoryPeople interface {
-	Migrate(ctx context.Context) error
-	Create(ctx context.Context, people model.People) (*model.People, error)
-	All(ctx context.Context) ([]model.People, error)
-	GetByID(ctx context.Context, id int64) (*model.People, error)
-	Update(ctx context.Context, id int64, updatedPeo model.People) (*model.People, error)
-	Delete(ctx context.Context, id int64) error
-}
-
-func (r *PgSQLPeopleRepository) Migrate(ctx context.Context) error {
+func (r *peopleDatabase) Migrate(ctx context.Context) error {
 	peopleQuery := `
     CREATE TABLE IF NOT EXISTS people(
 		id SERIAL PRIMARY KEY,
@@ -49,7 +41,7 @@ func (r *PgSQLPeopleRepository) Migrate(ctx context.Context) error {
 	return err
 }
 
-func (r *PgSQLPeopleRepository) Create(ctx context.Context, people model.People) (*model.People, error) {
+func (r *peopleDatabase) Create(ctx context.Context, people domain.People) (*domain.People, error) {
 	var id int64
 	err := r.db.QueryRowContext(ctx, "INSERT INTO people(name, SurName, patronymic) values($1, $2, $3) RETURNING id", people.Name, people.SurName, people.Patronymic).Scan(&id)
 	if err != nil {
@@ -66,16 +58,16 @@ func (r *PgSQLPeopleRepository) Create(ctx context.Context, people model.People)
 	return &people, nil
 }
 
-func (r *PgSQLPeopleRepository) All(ctx context.Context) ([]model.People, error) {
+func (r *peopleDatabase) All(ctx context.Context) ([]domain.People, error) {
 	rows, err := r.db.QueryContext(ctx, "SELECT * FROM people")
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var all []model.People
+	var all []domain.People
 	for rows.Next() {
-		var people model.People
+		var people domain.People
 		if err := rows.Scan(&people.ID, &people.Name, &people.SurName, &people.Patronymic); err != nil {
 			return nil, err
 		}
@@ -84,10 +76,10 @@ func (r *PgSQLPeopleRepository) All(ctx context.Context) ([]model.People, error)
 	return all, nil
 }
 
-func (r *PgSQLPeopleRepository) GetByID(ctx context.Context, id int64) (*model.People, error) {
+func (r *peopleDatabase) GetByID(ctx context.Context, id int64) (*domain.People, error) {
 	row := r.db.QueryRowContext(ctx, "SELECT * FROM people WHERE id = $1", id)
 
-	var people model.People
+	var people domain.People
 	if err := row.Scan(&people.ID, &people.Name, &people.SurName, &people.Patronymic); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, db.ErrNotExist
@@ -97,7 +89,7 @@ func (r *PgSQLPeopleRepository) GetByID(ctx context.Context, id int64) (*model.P
 	return &people, nil
 }
 
-func (r *PgSQLPeopleRepository) Update(ctx context.Context, id int64, updatedpeople model.People) (*model.People, error) {
+func (r *peopleDatabase) Update(ctx context.Context, id int64, updatedpeople domain.People) (*domain.People, error) {
 	res, err := r.db.ExecContext(ctx, "UPDATE people SET Name = $1, SurName = $2, Patronymic = $3 FROM people o WHERE people.id = $4", updatedpeople.Name, updatedpeople.SurName, updatedpeople.Patronymic, id)
 	if err != nil {
 		var pgxError *pgconn.PgError
@@ -121,7 +113,7 @@ func (r *PgSQLPeopleRepository) Update(ctx context.Context, id int64, updatedpeo
 	return &updatedpeople, nil
 }
 
-func (r *PgSQLPeopleRepository) Delete(ctx context.Context, id int64) error {
+func (r *peopleDatabase) Delete(ctx context.Context, id int64) error {
 	res, err := r.db.ExecContext(ctx, "DELETE FROM people WHERE id = $1", id)
 	if err != nil {
 		return err

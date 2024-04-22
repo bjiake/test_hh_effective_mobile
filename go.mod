@@ -3,16 +3,12 @@ module hh.ru
 go 1.22
 
 require (
-	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2
-	github.com/fir1/rest-api v0.0.0-20221016220342-bf62513e6a78
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-playground/validator/v10 v10.14.0
-	github.com/gorilla/mux v1.8.1
+	github.com/google/wire v0.6.0
 	github.com/jackc/pgconn v1.14.3
 	github.com/jackc/pgx/v4 v4.18.3
 	github.com/joho/godotenv v1.5.1
-	github.com/rs/cors v1.10.1
-	github.com/sirupsen/logrus v1.9.0
 )
 
 require (
@@ -29,13 +25,10 @@ require (
 	github.com/jackc/pgproto3/v2 v2.3.3 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20231201235250-de7065d80cb9 // indirect
 	github.com/jackc/pgtype v1.14.0 // indirect
-	github.com/jmoiron/sqlx v1.3.5 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/kelseyhightower/envconfig v1.4.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect
-	github.com/lib/pq v1.10.2 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect

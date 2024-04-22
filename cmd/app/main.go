@@ -1,8 +1,9 @@
 package main
 
 import (
-	"context"
 	_ "github.com/jackc/pgx/v4/stdlib"
+	"hh.ru/pkg/config"
+	"hh.ru/pkg/di"
 	"log"
 )
 
@@ -18,16 +19,14 @@ func main() {
 	//peopleRepository := people.NewPgSqlPeopleRepository(db)
 	//app.RunPeopleRepositoryDemo(context.Background(), peopleRepository)
 	//router.App(db)
-	if err := run(context.Background()); err != nil {
-		log.Fatalf("%+v", err)
+	config, configErr := config.LoadConfig()
+	if configErr != nil {
+		log.Fatal("cannot load config: ", configErr)
 	}
-}
-
-func run(ctx context.Context) error {
-	server, err := rest.NewServer()
-	if err != nil {
-		return err
+	server, diErr := di.InitializeAPI(config)
+	if diErr != nil {
+		log.Fatal("cannot start server: ", diErr)
+	} else {
+		server.Start()
 	}
-	err = server.Run(ctx)
-	return err
 }

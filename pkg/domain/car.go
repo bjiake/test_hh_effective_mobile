@@ -1,24 +1,28 @@
-package service
+package domain
 
 import (
-	"context"
 	"fmt"
 	"github.com/go-playground/validator/v10"
-	"hh.ru/cmd/internal/model"
-	"hh.ru/pkg/erru"
 	"regexp"
 	"strings"
 )
 
-type CreateParamsCar struct {
+/*
+ Регистрация кастомного тега
+validate := validator.New()
+validate.RegisterValidation("regNum", validateRegNum)
+*/
+
+type Car struct {
+	ID     int64  `json:"id"`
 	RegNum string `json:"regNum" validate:"required,regNum"`
 	Mark   string `json:"mark"`
-	Model  string `json:"model"`
-	Year   int32  `json:"year" validate:"gte=1600,lte=2024"`
+	Model  string `json:"domain"`
+	Year   int32  `json:"year" validate:"gte=1900,lte=2024"`
 	Owner  int64  `json:"owner"`
 }
 
-func (c CreateParamsCar) Validate() error {
+func (c Car) Validate() error {
 	validate := validator.New()
 	err := validate.RegisterValidation("regNum", validateRegNum)
 	if err != nil {
@@ -45,25 +49,4 @@ func validateRegNum(fl validator.FieldLevel) bool {
 		return false
 	}
 	return matched
-}
-
-func (s Service) Create(ctx context.Context, params CreateParamsCar) (*model.Car, error) {
-	if err := params.Validate(); err != nil {
-		return nil, erru.ErrArgument{Wrapped: err}
-	}
-
-	entity := model.Car{
-		RegNum: params.RegNum,
-		Mark:   params.Mark,
-		Model:  params.Model,
-		Year:   params.Year,
-		Owner:  params.Owner,
-	}
-
-	resultEntity, err := s.repoCar.Create(ctx, entity)
-	if err != nil {
-		return nil, err
-	}
-
-	return resultEntity, err
 }
