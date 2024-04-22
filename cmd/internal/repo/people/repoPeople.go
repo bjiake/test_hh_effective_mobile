@@ -6,7 +6,7 @@ import (
 	"errors"
 	"github.com/jackc/pgconn"
 	"hh.ru/cmd/internal/model"
-	"hh.ru/cmd/internal/repo"
+	"hh.ru/pkg/db"
 	"log"
 )
 
@@ -41,9 +41,9 @@ func (r *PgSQLPeopleRepository) Migrate(ctx context.Context) error {
 
 	_, err := r.db.ExecContext(ctx, peopleQuery)
 	if err != nil {
-		message := repo.ErrMigrate.Error() + " people"
+		message := db.ErrMigrate.Error() + " people"
 		log.Printf("%q: %s\n", message, err.Error())
-		return repo.ErrMigrate
+		return db.ErrMigrate
 	}
 
 	return err
@@ -56,7 +56,7 @@ func (r *PgSQLPeopleRepository) Create(ctx context.Context, people model.People)
 		var pgxError *pgconn.PgError
 		if errors.As(err, &pgxError) {
 			if pgxError.Code == "23505" {
-				return nil, repo.ErrDuplicate
+				return nil, db.ErrDuplicate
 			}
 		}
 		return nil, err
@@ -90,7 +90,7 @@ func (r *PgSQLPeopleRepository) GetByID(ctx context.Context, id int64) (*model.P
 	var people model.People
 	if err := row.Scan(&people.ID, &people.Name, &people.SurName, &people.Patronymic); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, repo.ErrNotExist
+			return nil, db.ErrNotExist
 		}
 		return nil, err
 	}
@@ -103,7 +103,7 @@ func (r *PgSQLPeopleRepository) Update(ctx context.Context, id int64, updatedpeo
 		var pgxError *pgconn.PgError
 		if errors.As(err, &pgxError) {
 			if pgxError.Code == "23505" {
-				return nil, repo.ErrDuplicate
+				return nil, db.ErrDuplicate
 			}
 		}
 		return nil, err
@@ -115,7 +115,7 @@ func (r *PgSQLPeopleRepository) Update(ctx context.Context, id int64, updatedpeo
 	}
 
 	if rowsAffected == 0 {
-		return nil, repo.ErrUpdateFailed
+		return nil, db.ErrUpdateFailed
 	}
 
 	return &updatedpeople, nil
@@ -133,7 +133,7 @@ func (r *PgSQLPeopleRepository) Delete(ctx context.Context, id int64) error {
 	}
 
 	if rowsAffected == 0 {
-		return repo.ErrDeleteFailed
+		return db.ErrDeleteFailed
 	}
 
 	return err
