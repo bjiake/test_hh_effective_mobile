@@ -1,7 +1,7 @@
 package api
 
 import (
-	//_ "github.com/bjiake/test_hh_effective_mobile/tree/master/cmd/docs"
+	//_ "github.com/bjiake/test_hh_effective_mobile/cmd/docs"
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
