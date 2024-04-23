@@ -18,7 +18,8 @@ func NewServerHTTP(userHandler *handler.Handler) *ServerHTTP {
 	// Swagger docs
 	//engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
-	engine.GET("car/:id", userHandler.FindCarByID)
+	//engine.GET("car/:id", userHandler.FindCarByID)
+	engine.GET("car", userHandler.FindCarFilter)
 	engine.PUT("car", userHandler.UpdateCar)
 	engine.POST("car", userHandler.CreateCar)
 	engine.DELETE("car/:id", userHandler.DeleteCar)

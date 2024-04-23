@@ -6,10 +6,12 @@ import (
 	"errors"
 	"fmt"
 	"github.com/jackc/pgconn"
+	"hh.ru/pkg/api/filter"
 	"hh.ru/pkg/db"
 	"hh.ru/pkg/domain"
 	"hh.ru/pkg/repo/car/interface"
 	"log"
+	"strings"
 )
 
 type carDatabase struct {
@@ -78,17 +80,69 @@ func (r *carDatabase) All(ctx context.Context) ([]domain.Car, error) {
 	return all, nil
 }
 
-func (r *carDatabase) GetByID(ctx context.Context, id int64) (*domain.Car, error) {
-	row := r.db.QueryRowContext(ctx, "SELECT * FROM car WHERE id = $1", id)
+//	func (r *carDatabase) GetByID(ctx context.Context, id int64) (*domain.Car, error) {
+//		row := r.db.QueryRowContext(ctx, "SELECT * FROM car WHERE id = $1", id)
+//
+//		var car domain.Car
+//		if err := row.Scan(&car.ID, &car.RegNum, &car.Mark, &car.Model, &car.Year, &car.Owner); err != nil {
+//			if errors.Is(err, sql.ErrNoRows) {
+//				return nil, db.ErrNotExist
+//			}
+//			return nil, err
+//		}
+//		return &car, nil
+//	}
+func (r *carDatabase) Get(ctx context.Context, filter *filter.Filter) ([]domain.Car, error) {
+	query := "SELECT * FROM car"
+	var args []interface{}
 
-	var car domain.Car
-	if err := row.Scan(&car.ID, &car.RegNum, &car.Mark, &car.Model, &car.Year, &car.Owner); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, db.ErrNotExist
+	if filter != nil {
+		var whereClauses []string
+		if filter.ID != nil {
+			whereClauses = append(whereClauses, "id = $1")
+			args = append(args, *filter.ID)
 		}
+		if filter.RegNum != nil {
+			whereClauses = append(whereClauses, "reg_num = $2")
+			args = append(args, *filter.RegNum)
+		}
+		if filter.Mark != nil {
+			whereClauses = append(whereClauses, "mark = $3")
+			args = append(args, *filter.Mark)
+		}
+		if filter.Model != nil {
+			whereClauses = append(whereClauses, "model = $4")
+			args = append(args, *filter.Model)
+		}
+		if filter.Year != nil {
+			whereClauses = append(whereClauses, "year = $5")
+			args = append(args, *filter.Year)
+		}
+		if filter.Owner != nil {
+			whereClauses = append(whereClauses, "owner = $6")
+			args = append(args, *filter.Owner)
+		}
+
+		if len(whereClauses) > 0 {
+			query += " WHERE " + strings.Join(whereClauses, " AND ")
+		}
+	}
+
+	rows, err := r.db.QueryContext(ctx, query, args...)
+	if err != nil {
 		return nil, err
 	}
-	return &car, nil
+	defer rows.Close()
+
+	var cars []domain.Car
+	for rows.Next() {
+		var car domain.Car
+		if err := rows.Scan(&car.ID, &car.RegNum, &car.Mark, &car.Model, &car.Year, &car.Owner); err != nil {
+			return nil, err
+		}
+		cars = append(cars, car)
+	}
+	return cars, nil
 }
 
 func (r *carDatabase) Update(ctx context.Context, id int64, updatedCar domain.Car) (*domain.Car, error) {

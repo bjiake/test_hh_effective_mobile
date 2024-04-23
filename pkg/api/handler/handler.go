@@ -2,6 +2,7 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
+	"hh.ru/pkg/api/filter"
 	"hh.ru/pkg/domain"
 	services "hh.ru/pkg/service/interface"
 	"log"
@@ -17,6 +18,20 @@ func NewHandler(service services.ServiceUseCase) *Handler {
 	return &Handler{
 		service: service,
 	}
+}
+
+func (h *Handler) FindCarFilter(c *gin.Context) {
+	var filterI filter.Filter
+	if err := c.BindQuery(&filterI); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	cars, err := h.service.GetCarFilter(c.Request.Context(), &filterI)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": cars})
 }
 
 func (h *Handler) FindCarByID(c *gin.Context) {

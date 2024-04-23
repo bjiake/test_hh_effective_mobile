@@ -1,8 +1,6 @@
 //Тут я тестил репозитории к бд
 
-
-//package app
-
+package app
 
 //import (
 //	"context"
