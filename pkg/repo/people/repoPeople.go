@@ -4,11 +4,14 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"github.com/jackc/pgconn"
+	"hh.ru/pkg/api/filter"
 	"hh.ru/pkg/db"
 	"hh.ru/pkg/domain"
 	"hh.ru/pkg/repo/people/interface"
 	"log"
+	"strings"
 )
 
 type peopleDatabase struct {
@@ -58,35 +61,49 @@ func (r *peopleDatabase) Create(ctx context.Context, people domain.People) (*dom
 	return &people, nil
 }
 
-func (r *peopleDatabase) All(ctx context.Context) ([]domain.People, error) {
-	rows, err := r.db.QueryContext(ctx, "SELECT * FROM people")
+func (r *peopleDatabase) Get(ctx context.Context, filter *filter.People) ([]domain.People, error) {
+	query := "SELECT * FROM people"
+	var args []interface{}
+
+	if filter != nil {
+		var whereClauses []string
+		if filter.ID != nil {
+			args = append(args, *filter.ID)
+			whereClauses = append(whereClauses, fmt.Sprintf("id = $%d", len(args)))
+		}
+		if filter.Name != nil {
+			args = append(args, *filter.Name)
+			whereClauses = append(whereClauses, fmt.Sprintf("name = $%d", len(args)))
+		}
+		if filter.SurName != nil {
+			args = append(args, *filter.SurName)
+			whereClauses = append(whereClauses, fmt.Sprintf("surname = $%d", len(args)))
+		}
+		if filter.Patronymic != nil {
+			args = append(args, *filter.Patronymic)
+			whereClauses = append(whereClauses, fmt.Sprintf("patronymic = $%d", len(args)))
+		}
+
+		if len(whereClauses) > 0 {
+			query += " WHERE " + strings.Join(whereClauses, " AND ")
+		}
+	}
+
+	rows, err := r.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var all []domain.People
+	var peoples []domain.People
 	for rows.Next() {
 		var people domain.People
 		if err := rows.Scan(&people.ID, &people.Name, &people.SurName, &people.Patronymic); err != nil {
 			return nil, err
 		}
-		all = append(all, people)
+		peoples = append(peoples, people)
 	}
-	return all, nil
-}
-
-func (r *peopleDatabase) GetByID(ctx context.Context, id int64) (*domain.People, error) {
-	row := r.db.QueryRowContext(ctx, "SELECT * FROM people WHERE id = $1", id)
-
-	var people domain.People
-	if err := row.Scan(&people.ID, &people.Name, &people.SurName, &people.Patronymic); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, db.ErrNotExist
-		}
-		return nil, err
-	}
-	return &people, nil
+	return peoples, nil
 }
 
 func (r *peopleDatabase) Update(ctx context.Context, id int64, updatedpeople domain.People) (*domain.People, error) {

@@ -7,19 +7,25 @@ import (
 	"strings"
 )
 
-/*
- Регистрация кастомного тега
-validate := validator.New()
-validate.RegisterValidation("regNum", validateRegNum)
-*/
-
+// Car represents a car entity
 type Car struct {
-	ID     int64  `json:"id"`
-	RegNum string `json:"regNum" validate:"required,regNum"`
-	Mark   string `json:"mark"`
-	Model  string `json:"domain"`
-	Year   int32  `json:"year" validate:"gte=1900,lte=2024"`
-	Owner  int64  `json:"owner"`
+	// ID is the unique identifier of the car
+	ID int64 `json:"id" validate:"required" swagger:"description:Unique identifier of the car"`
+
+	// RegNum is the registration number of the car
+	RegNum string `json:"regNum" validate:"required,regNum" swagger:"description:Registration number of the car"`
+
+	// Mark is the brand of the car
+	Mark string `json:"mark" validate:"required" swagger:"description:Brand of the car"`
+
+	// Model is the model of the car
+	Model string `json:"model" validate:"required" swagger:"description:Model of the car"`
+
+	// Year is the year of manufacture of the car
+	Year int32 `json:"year" validate:"required,gte=1900,lte=2024" swagger:"description:Year of manufacture of the car"`
+
+	// Owner is the ID of the car's owner
+	Owner int64 `json:"owner" validate:"required" swagger:"description:ID of the car's owner"`
 }
 
 func (c Car) Validate() error {
@@ -49,4 +55,32 @@ func validateRegNum(fl validator.FieldLevel) bool {
 		return false
 	}
 	return matched
+}
+
+type UpdateCar struct {
+	ID     int64  `json:"id" validate:"required"`
+	RegNum string `json:"regNum" validate:"omitempty,regNum"`
+	Mark   string `json:"mark" validate:"omitempty"`
+	Model  string `json:"domain" validate:"omitempty"`
+	Year   int32  `json:"year" validate:"omitempty,gte=1900,lte=2024"`
+	Owner  int64  `json:"owner" validate:"omitempty"`
+}
+
+func (c UpdateCar) Validate() error {
+	validate := validator.New()
+	err := validate.RegisterValidation("regNum", validateRegNum)
+	if err != nil {
+		return err
+	}
+
+	err = validate.Struct(c)
+	if err != nil {
+		// Обработка ошибок валидации
+		var validationErrors []string
+		for _, err := range err.(validator.ValidationErrors) {
+			validationErrors = append(validationErrors, err.Error())
+		}
+		return fmt.Errorf("car validation errors: %s", strings.Join(validationErrors, ", "))
+	}
+	return err
 }

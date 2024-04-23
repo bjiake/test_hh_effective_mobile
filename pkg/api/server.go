@@ -1,7 +1,10 @@
 package api
 
 import (
+	//_ "github.com/bjiake/test_hh_effective_mobile/tree/master/cmd/docs"
 	"github.com/gin-gonic/gin"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"hh.ru/pkg/api/handler"
 )
 
@@ -16,13 +19,19 @@ func NewServerHTTP(userHandler *handler.Handler) *ServerHTTP {
 	engine.Use(gin.Logger())
 
 	// Swagger docs
-	//engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
-	//engine.GET("car/:id", userHandler.FindCarByID)
-	engine.GET("car", userHandler.FindCarFilter)
+	//Car methods
+	engine.GET("car", userHandler.GetCar)
 	engine.PUT("car", userHandler.UpdateCar)
 	engine.POST("car", userHandler.CreateCar)
 	engine.DELETE("car/:id", userHandler.DeleteCar)
+
+	//People methods
+	engine.GET("people", userHandler.GetPeople)
+	engine.PUT("people", userHandler.UpdatePeople)
+	engine.POST("people", userHandler.CreatePeople)
+	engine.DELETE("people/:id", userHandler.DeletePeople)
 
 	return &ServerHTTP{engine: engine}
 }

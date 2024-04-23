@@ -47,7 +47,7 @@ func (r *carDatabase) Migrate(ctx context.Context) error {
 
 func (r *carDatabase) Create(ctx context.Context, car domain.Car) (*domain.Car, error) {
 	var id int64
-	err := r.db.QueryRowContext(ctx, "INSERT INTO car(regnum, mark, domain, year, owner) values($1, $2, $3, $4, $5) RETURNING id", car.RegNum, car.Mark, car.Model, car.Year, car.Owner).Scan(&id)
+	err := r.db.QueryRowContext(ctx, "INSERT INTO car(regnum, mark, model, year, owner) values($1, $2, $3, $4, $5) RETURNING id", car.RegNum, car.Mark, car.Model, car.Year, car.Owner).Scan(&id)
 	if err != nil {
 		var pgxError *pgconn.PgError
 		if errors.As(err, &pgxError) {
@@ -92,27 +92,27 @@ func (r *carDatabase) All(ctx context.Context) ([]domain.Car, error) {
 //		}
 //		return &car, nil
 //	}
-func (r *carDatabase) Get(ctx context.Context, filter *filter.Filter) ([]domain.Car, error) {
+func (r *carDatabase) Get(ctx context.Context, filter *filter.Car) ([]domain.Car, error) {
 	query := "SELECT * FROM car"
 	var args []interface{}
 
 	if filter != nil {
 		var whereClauses []string
 		if filter.ID != nil {
-			whereClauses = append(whereClauses, "id = $1")
 			args = append(args, *filter.ID)
+			whereClauses = append(whereClauses, fmt.Sprintf("id = $%d", len(args)))
 		}
 		if filter.RegNum != nil {
-			whereClauses = append(whereClauses, "reg_num = $2")
 			args = append(args, *filter.RegNum)
+			whereClauses = append(whereClauses, fmt.Sprintf("regNum = $%d", len(args)))
 		}
 		if filter.Mark != nil {
-			whereClauses = append(whereClauses, "mark = $3")
 			args = append(args, *filter.Mark)
+			whereClauses = append(whereClauses, fmt.Sprintf("mark = $%d", len(args)))
 		}
 		if filter.Model != nil {
-			whereClauses = append(whereClauses, "model = $4")
 			args = append(args, *filter.Model)
+			whereClauses = append(whereClauses, fmt.Sprintf("model = $%d", len(args)))
 		}
 		if filter.Year != nil {
 			whereClauses = append(whereClauses, "year = $5")

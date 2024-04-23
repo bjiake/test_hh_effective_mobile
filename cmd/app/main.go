@@ -7,6 +7,11 @@ import (
 	"log"
 )
 
+// @title hh.ru/test/mobile
+// @version 1.0
+// @description API Server for test work
+// @host localhost:3000
+// @BasePath /
 func main() {
 	//db := repo.ConnectToBD()
 	//defer repo.CloseDB(db)

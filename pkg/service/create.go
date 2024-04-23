@@ -9,7 +9,7 @@ import (
 	"log"
 )
 
-func (s service) Create(ctx context.Context, car domain.Car) (*domain.Car, error) {
+func (s service) CreateCar(ctx context.Context, car domain.Car) (*domain.Car, error) {
 	if err := car.Validate(); err != nil {
 		log.Println(err.Error())
 		return nil, err
@@ -17,10 +17,24 @@ func (s service) Create(ctx context.Context, car domain.Car) (*domain.Car, error
 
 	resultEntity, err := s.repoCar.Create(ctx, car)
 	if errors.Is(err, db.ErrDuplicate) {
-		fmt.Printf("record: %+v already exists\n", car)
-		return nil, err
+		return nil, fmt.Errorf("record: %+v already exists\n", car)
 	} else if err != nil {
 		log.Println(err)
+		return nil, err
+	}
+
+	return resultEntity, err
+}
+
+func (s service) CreatePeople(ctx context.Context, people domain.People) (*domain.People, error) {
+	if err := people.Validate(); err != nil {
+		return nil, err
+	}
+
+	resultEntity, err := s.repoPeople.Create(ctx, people)
+	if errors.Is(err, db.ErrDuplicate) {
+		return nil, fmt.Errorf("record: %+v already exists\n", people)
+	} else if err != nil {
 		return nil, err
 	}
 

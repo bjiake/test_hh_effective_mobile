@@ -20,13 +20,28 @@ func NewHandler(service services.ServiceUseCase) *Handler {
 	}
 }
 
-func (h *Handler) FindCarFilter(c *gin.Context) {
-	var filterI filter.Filter
+// GetCar godoc
+// @Summary Get cars
+// @Description Get a list of cars with optional filtering
+// @Tags Car
+// @Accept json
+// @Produce json
+// @Param regNum query string false "Filter by registration number"
+// @Param mark query string false "Filter by car mark (brand)"
+// @Param model query string false "Filter by car model"
+// @Param year query integer false "Filter by car year"
+// @Param owner query integer false "Filter by owner ID"
+// @Success 200 {array} domain.Car "OK"
+// @Failure 400 {object} github.com/gin-gonic/gin.H "Bad Request"
+// @Failure 500 {object} github.com/gin-gonic/gin.H "Internal Server Error"
+// @Router /car [get]
+func (h *Handler) GetCar(c *gin.Context) {
+	var filterI filter.Car
 	if err := c.BindQuery(&filterI); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	cars, err := h.service.GetCarFilter(c.Request.Context(), &filterI)
+	cars, err := h.service.GetCar(c.Request.Context(), &filterI)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -34,24 +49,17 @@ func (h *Handler) FindCarFilter(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": cars})
 }
 
-func (h *Handler) FindCarByID(c *gin.Context) {
-	paramsId := c.Param("id")
-	id, err := strconv.ParseInt(paramsId, 10, 64)
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "cannot parse id",
-		})
-		return
-	}
-
-	car, err := h.service.GetCar(c.Request.Context(), id)
-	if err != nil {
-		c.JSON(http.StatusNotFound, err.Error())
-	}
-	c.JSON(http.StatusOK, car)
-}
-
+// CreateCar godoc
+// @Summary Create a new car
+// @Description Create a new car with the provided data
+// @Tags Car
+// @Accept json
+// @Produce json
+// @Param car body domain.Car true "Car data"
+// @Success 201 {object} domain.Car "Created"
+// @Failure 400 {object} github.com/gin-gonic/gin.H "Bad Request"
+// @Failure 500 {object} string "Internal Server Error"
+// @Router /car [post]
 func (h *Handler) CreateCar(c *gin.Context) {
 	var createCar domain.Car
 
@@ -61,7 +69,7 @@ func (h *Handler) CreateCar(c *gin.Context) {
 		return
 	}
 
-	car, err := h.service.Create(c.Request.Context(), createCar)
+	car, err := h.service.CreateCar(c.Request.Context(), createCar)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		log.Println("error create car:", err.Error())
@@ -69,14 +77,26 @@ func (h *Handler) CreateCar(c *gin.Context) {
 	}
 	c.JSON(http.StatusCreated, car)
 }
+
+// UpdateCar godoc
+// @Summary Update a car
+// @Description Update an existing car with the provided data
+// @Tags Car
+// @Accept json
+// @Produce json
+// @Param car body domain.UpdateCar true "Car update data"
+// @Success 200 {object} domain.Car "OK"
+// @Failure 400 {object} github.com/gin-gonic/gin.H "Bad Request"
+// @Failure 500 {object} string "Internal Server Error"
+// @Router /car [put]
 func (h *Handler) UpdateCar(c *gin.Context) {
-	var updateCar domain.Car
+	var updateCar domain.UpdateCar
 	if err := c.BindJSON(&updateCar); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error update": err.Error()})
 		log.Println("error binding car:", err.Error())
 		return
 	}
-	car, err := h.service.Update(c.Request.Context(), updateCar)
+	car, err := h.service.UpdateCar(c.Request.Context(), updateCar)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		log.Println("error update car:", err.Error())
@@ -85,19 +105,144 @@ func (h *Handler) UpdateCar(c *gin.Context) {
 	c.JSON(http.StatusOK, car)
 }
 
+// DeleteCar godoc
+// @Summary Delete a car
+// @Description Delete a car by ID
+// @Tags Car
+// @Accept json
+// @Produce plain
+// @Param id path integer true "Car ID"
+// @Success 204 "No Content"
+// @Failure 500 {object} string "Internal Server Error"
+// @Router /car/{id} [delete]
 func (h *Handler) DeleteCar(c *gin.Context) {
 	paramsId := c.Param("id")
 	id, err := strconv.ParseInt(paramsId, 10, 64)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
-		log.Println("error param id:", err.Error())
+		log.Println(err.Error())
 		return
 	}
 
-	err = h.service.Delete(c.Request.Context(), id)
+	err = h.service.DeleteCar(c.Request.Context(), id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
-		log.Println("error delete car:", err.Error())
+		log.Println(err.Error())
+		return
+	}
+
+	c.JSON(http.StatusNoContent, gin.H{"deleted": true})
+}
+
+// GetPeople godoc
+// @Summary Get people
+// @Description Get a list of people with optional filtering
+// @Tags People
+// @Accept json
+// @Produce json
+// @Param id query integer false "Filter by ID"
+// @Param name query string false "Filter by name"
+// @Param surName query string false "Filter by surname"
+// @Param patronymic query string false "Filter by patronymic"
+// @Success 200 {array} domain.People "OK"
+// @Failure 400 {object} github.com/gin-gonic/gin.H "Bad Request"
+// @Failure 500 {object} github.com/gin-gonic/gin.H "Internal Server Error"
+// @Router /people [get]
+func (h *Handler) GetPeople(c *gin.Context) {
+	var filterI filter.People
+	if err := c.BindQuery(&filterI); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		log.Println(err.Error())
+		return
+	}
+	cars, err := h.service.GetPeople(c.Request.Context(), &filterI)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		log.Println(err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": cars})
+}
+
+// CreatePeople godoc
+// @Summary Create a new person
+// @Description Create a new person with the provided data
+// @Tags People
+// @Accept json
+// @Produce json
+// @Param people body domain.People true "Person data"
+// @Success 201 {object} domain.People "Created"
+// @Failure 400 {object} github.com/gin-gonic/gin.H "Bad Request"
+// @Failure 500 {object} string "Internal Server Error"
+// @Router /people [post]
+func (h *Handler) CreatePeople(c *gin.Context) {
+	var createCar domain.People
+
+	if err := c.BindJSON(&createCar); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error create": err.Error()})
+		log.Println(err.Error())
+		return
+	}
+
+	car, err := h.service.CreatePeople(c.Request.Context(), createCar)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err.Error())
+		log.Println(err.Error())
+		return
+	}
+	c.JSON(http.StatusCreated, car)
+}
+
+// UpdatePeople godoc
+// @Summary Update a person
+// @Description Update an existing person with the provided data
+// @Tags People
+// @Accept json
+// @Produce json
+// @Param people body domain.UpdatePeople true "Person update data"
+// @Success 200 {object} domain.People "OK"
+// @Failure 400 {object} github.com/gin-gonic/gin.H "Bad Request"
+// @Failure 500 {object} string "Internal Server Error"
+// @Router /people [put]
+func (h *Handler) UpdatePeople(c *gin.Context) {
+	var updateCar domain.UpdatePeople
+	if err := c.BindJSON(&updateCar); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error update": err.Error()})
+		log.Println(err.Error())
+		return
+	}
+	car, err := h.service.UpdatePeople(c.Request.Context(), updateCar)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err.Error())
+		log.Println(err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, car)
+}
+
+// DeletePeople godoc
+// @Summary Delete a person
+// @Description Delete a person by ID
+// @Tags People
+// @Accept json
+// @Produce plain
+// @Param id path integer true "Person ID"
+// @Success 204 "No Content"
+// @Failure 500 {object} string "Internal Server Error"
+// @Router /people/{id} [delete]
+func (h *Handler) DeletePeople(c *gin.Context) {
+	paramsId := c.Param("id")
+	id, err := strconv.ParseInt(paramsId, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err.Error())
+		log.Println(err.Error())
+		return
+	}
+
+	err = h.service.DeletePeople(c.Request.Context(), id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err.Error())
+		log.Println(err.Error())
 		return
 	}
 
