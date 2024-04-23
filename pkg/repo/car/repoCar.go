@@ -45,9 +45,14 @@ func (r *carDatabase) Migrate(ctx context.Context) error {
 	return err
 }
 
-func (r *carDatabase) Create(ctx context.Context, car domain.Car) (*domain.Car, error) {
+func (r *carDatabase) Create(ctx context.Context, car domain.Car) (*domain.RequestCar, error) {
 	var id int64
-	err := r.db.QueryRowContext(ctx, "INSERT INTO car(regnum, mark, model, year, owner) values($1, $2, $3, $4, $5) RETURNING id", car.RegNum, car.Mark, car.Model, car.Year, car.Owner).Scan(&id)
+	owner, err := r.getOwner(ctx, car.Owner)
+	if err != nil {
+		return nil, fmt.Errorf("create car: %w", err)
+	}
+
+	err = r.db.QueryRowContext(ctx, "INSERT INTO car(regnum, mark, model, year, owner) values($1, $2, $3, $4, $5) RETURNING id", car.RegNum, car.Mark, car.Model, car.Year, car.Owner).Scan(&id)
 	if err != nil {
 		var pgxError *pgconn.PgError
 		if errors.As(err, &pgxError) {
@@ -59,40 +64,45 @@ func (r *carDatabase) Create(ctx context.Context, car domain.Car) (*domain.Car, 
 	}
 	car.ID = id
 
-	return &car, nil
+	requestCar := &domain.RequestCar{
+		ID:     car.ID,
+		RegNum: car.RegNum,
+		Mark:   car.Mark,
+		Model:  car.Model,
+		Year:   car.Year,
+		Owner:  owner,
+	}
+
+	return requestCar, nil
 }
 
-func (r *carDatabase) All(ctx context.Context) ([]domain.Car, error) {
-	rows, err := r.db.QueryContext(ctx, "SELECT * FROM car")
-	if err != nil {
+func (r *carDatabase) GetByRegNum(ctx context.Context, regNum string) (*domain.RequestCar, error) {
+	row := r.db.QueryRowContext(ctx, "SELECT * FROM car WHERE regnum = $1", regNum)
+
+	var car domain.Car
+	if err := row.Scan(&car.ID, &car.RegNum, &car.Mark, &car.Model, &car.Year, &car.Owner); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, db.ErrNotExist
+		}
 		return nil, err
 	}
-	defer rows.Close()
-
-	var all []domain.Car
-	for rows.Next() {
-		var car domain.Car
-		if err := rows.Scan(&car.ID, &car.RegNum, &car.Mark, &car.Model, &car.Year, &car.Owner); err != nil {
-			return nil, err
-		}
-		all = append(all, car)
+	owner, err := r.getOwner(ctx, car.Owner)
+	if err != nil {
+		return nil, fmt.Errorf("getByRegNum: %w", err)
 	}
-	return all, nil
+
+	requestCar := &domain.RequestCar{
+		ID:     car.ID,
+		RegNum: car.RegNum,
+		Mark:   car.Mark,
+		Model:  car.Model,
+		Year:   car.Year,
+		Owner:  owner,
+	}
+	return requestCar, nil
 }
 
-//	func (r *carDatabase) GetByID(ctx context.Context, id int64) (*domain.Car, error) {
-//		row := r.db.QueryRowContext(ctx, "SELECT * FROM car WHERE id = $1", id)
-//
-//		var car domain.Car
-//		if err := row.Scan(&car.ID, &car.RegNum, &car.Mark, &car.Model, &car.Year, &car.Owner); err != nil {
-//			if errors.Is(err, sql.ErrNoRows) {
-//				return nil, db.ErrNotExist
-//			}
-//			return nil, err
-//		}
-//		return &car, nil
-//	}
-func (r *carDatabase) Get(ctx context.Context, filter *filter.Car) ([]domain.Car, error) {
+func (r *carDatabase) Get(ctx context.Context, filter *filter.Car) ([]domain.RequestCar, error) {
 	query := "SELECT * FROM car"
 	var args []interface{}
 
@@ -104,7 +114,7 @@ func (r *carDatabase) Get(ctx context.Context, filter *filter.Car) ([]domain.Car
 		}
 		if filter.RegNum != nil {
 			args = append(args, *filter.RegNum)
-			whereClauses = append(whereClauses, fmt.Sprintf("regNum = $%d", len(args)))
+			whereClauses = append(whereClauses, fmt.Sprintf("regnum = $%d", len(args)))
 		}
 		if filter.Mark != nil {
 			args = append(args, *filter.Mark)
@@ -134,18 +144,30 @@ func (r *carDatabase) Get(ctx context.Context, filter *filter.Car) ([]domain.Car
 	}
 	defer rows.Close()
 
-	var cars []domain.Car
+	var cars []domain.RequestCar
 	for rows.Next() {
 		var car domain.Car
 		if err := rows.Scan(&car.ID, &car.RegNum, &car.Mark, &car.Model, &car.Year, &car.Owner); err != nil {
 			return nil, err
 		}
-		cars = append(cars, car)
+		owner, err := r.getOwner(ctx, car.Owner)
+		if err != nil {
+			return nil, err
+		}
+
+		requestCar := domain.RequestCar{
+			ID:     car.ID,
+			RegNum: car.RegNum,
+			Mark:   car.Mark,
+			Model:  car.Model,
+			Year:   car.Year,
+			Owner:  owner,
+		}
+		cars = append(cars, requestCar)
 	}
 	return cars, nil
 }
-
-func (r *carDatabase) Update(ctx context.Context, id int64, updatedCar domain.Car) (*domain.Car, error) {
+func (r *carDatabase) Update(ctx context.Context, id int64, updatedCar domain.Car) (*domain.RequestCar, error) {
 	res, err := r.db.ExecContext(ctx, "UPDATE car SET RegNum = $1, Mark = $2, Model = $3, Year = $4, owner = o.id FROM people o WHERE car.id = $5 AND car.owner = o.id", updatedCar.RegNum, updatedCar.Mark, fmt.Sprint("%v", updatedCar.Year), updatedCar.Owner, id)
 	if err != nil {
 		var pgxError *pgconn.PgError
@@ -157,6 +179,20 @@ func (r *carDatabase) Update(ctx context.Context, id int64, updatedCar domain.Ca
 		return nil, err
 	}
 
+	owner, err := r.getOwner(ctx, updatedCar.Owner)
+	if err != nil {
+		return nil, fmt.Errorf("update people: %v", err)
+	}
+
+	requestCar := &domain.RequestCar{
+		ID:     updatedCar.ID,
+		RegNum: updatedCar.RegNum,
+		Mark:   updatedCar.Mark,
+		Model:  updatedCar.Model,
+		Year:   updatedCar.Year,
+		Owner:  owner,
+	}
+
 	rowsAffected, err := res.RowsAffected()
 	if err != nil {
 		return nil, err
@@ -166,7 +202,7 @@ func (r *carDatabase) Update(ctx context.Context, id int64, updatedCar domain.Ca
 		return nil, db.ErrUpdateFailed
 	}
 
-	return &updatedCar, nil
+	return requestCar, nil
 }
 
 func (r *carDatabase) Delete(ctx context.Context, id int64) error {
@@ -185,4 +221,19 @@ func (r *carDatabase) Delete(ctx context.Context, id int64) error {
 	}
 
 	return err
+}
+
+func (r *carDatabase) getOwner(ctx context.Context, ownerID int64) (domain.People, error) {
+	row := r.db.QueryRowContext(ctx, "SELECT * FROM people WHERE id = $1", ownerID)
+	if row == nil {
+		return domain.People{}, db.ErrOwnerNotFound
+	}
+
+	var owner domain.People
+	err := row.Scan(&owner.ID, &owner.Name, &owner.SurName, &owner.Patronymic)
+	if err != nil {
+		return domain.People{}, db.ErrOwnerNotFound
+	}
+
+	return owner, nil
 }

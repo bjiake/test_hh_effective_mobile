@@ -10,7 +10,7 @@ import (
 // Car represents a car entity
 type Car struct {
 	// ID is the unique identifier of the car
-	ID int64 `json:"id" validate:"required" swagger:"description:Unique identifier of the car"`
+	ID int64 `json:"id" swagger:"description:Unique identifier of the car"`
 
 	// RegNum is the registration number of the car
 	RegNum string `json:"regNum" validate:"required,regNum" swagger:"description:Registration number of the car"`
@@ -22,7 +22,7 @@ type Car struct {
 	Model string `json:"model" validate:"required" swagger:"description:Model of the car"`
 
 	// Year is the year of manufacture of the car
-	Year int32 `json:"year" validate:"required,gte=1900,lte=2024" swagger:"description:Year of manufacture of the car"`
+	Year int64 `json:"year" validate:"required,number" swagger:"description:Year of manufacture of the car"`
 
 	// Owner is the ID of the car's owner
 	Owner int64 `json:"owner" validate:"required" swagger:"description:ID of the car's owner"`
@@ -58,11 +58,11 @@ func validateRegNum(fl validator.FieldLevel) bool {
 }
 
 type UpdateCar struct {
-	ID     int64  `json:"id" validate:"required"`
+	ID     int64  `json:"id"`
 	RegNum string `json:"regNum" validate:"omitempty,regNum"`
 	Mark   string `json:"mark" validate:"omitempty"`
 	Model  string `json:"domain" validate:"omitempty"`
-	Year   int32  `json:"year" validate:"omitempty,gte=1900,lte=2024"`
+	Year   int64  `json:"year" validate:"omitempty"`
 	Owner  int64  `json:"owner" validate:"omitempty"`
 }
 
@@ -83,4 +83,25 @@ func (c UpdateCar) Validate() error {
 		return fmt.Errorf("car validation errors: %s", strings.Join(validationErrors, ", "))
 	}
 	return err
+}
+
+// RequestCar represents a car request
+type RequestCar struct {
+	// ID is the unique identifier of the car
+	ID int64 `json:"id" swagger:"description:Unique identifier of the car"`
+
+	// RegNum is the registration number of the car
+	RegNum string `json:"regNum" swagger:"description:Registration number of the car"`
+
+	// Mark is the brand of the car
+	Mark string `json:"mark" swagger:"description:Brand of the car"`
+
+	// Model is the model of the car
+	Model string `json:"model" swagger:"description:Model of the car"`
+
+	// Year is the year of manufacture of the car
+	Year int64 `json:"year" swagger:"description:Year of manufacture of the car"`
+
+	// Owner is the owner of the car
+	Owner People `json:"owner" swagger:"description:Owner of the car"`
 }

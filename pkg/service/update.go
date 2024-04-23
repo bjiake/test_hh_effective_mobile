@@ -12,44 +12,52 @@ import (
 	"regexp"
 )
 
-func (s service) UpdateCar(ctx context.Context, uCar domain.UpdateCar) (*domain.Car, error) {
-	// find todo object
+func (s service) UpdateCar(ctx context.Context, uCar domain.UpdateCar) (*domain.RequestCar, error) {
+	// find car object
 	filterI := filter.Car{ID: &uCar.ID}
-	todo, err := s.GetCar(ctx, &filterI)
+	temp, err := s.GetCar(ctx, &filterI)
 	if err != nil {
 		return nil, err
 	}
+	car := domain.Car{
+		ID:     temp[0].ID,
+		Model:  temp[0].Model,
+		RegNum: temp[0].RegNum,
+		Mark:   temp[0].Mark,
+		Year:   temp[0].Year,
+		Owner:  temp[0].Owner.ID,
+	}
 
-	if err := uCar.Validate(); err != nil {
+	if uCar.RegNum != "" && uCar.RegNum != car.RegNum {
+		car.RegNum = uCar.RegNum
+	}
+	if uCar.Mark != "" && uCar.Mark != car.Mark {
+		car.Mark = uCar.Mark
+	}
+	if uCar.Model != "" && uCar.Model != car.Model {
+		car.Model = uCar.Model
+	}
+	if uCar.Year != 0 && uCar.Year != car.Year {
+		car.Year = uCar.Year
+	}
+	if uCar.Owner != 0 && uCar.Owner != car.Owner {
+		car.Owner = uCar.Owner
+	}
+
+	if err := car.Validate(); err != nil {
 		return nil, err
 	}
 
-	if uCar.RegNum != "" && uCar.Validate() == nil {
-		todo[0].RegNum = uCar.RegNum
-	}
-	if uCar.Mark != "" {
-		todo[0].Mark = uCar.Mark
-	}
-	if uCar.Model != "" {
-		todo[0].Model = uCar.Model
-	}
-	if uCar.Year != 0 {
-		todo[0].Year = uCar.Year
-	}
-	if uCar.Owner != 0 {
-		todo[0].Owner = uCar.Owner
-	}
-
-	resultCar, err := s.repoCar.Update(ctx, todo[0].ID, todo[0])
+	requestCar, err := s.repoCar.Update(ctx, car.ID, car)
 	if errors.Is(err, db.ErrDuplicate) {
-		return resultCar, fmt.Errorf("record: %+v already exists\n", uCar)
+		return nil, fmt.Errorf("record: %+v already exists\n", uCar)
 	} else if errors.Is(err, db.ErrUpdateFailed) {
-		return resultCar, fmt.Errorf("update of record: %+v failed", uCar)
+		return nil, fmt.Errorf("update of record: %+v failed", uCar)
 	} else if err != nil {
-		return resultCar, err
+		return nil, err
 	}
 
-	return resultCar, err
+	return requestCar, err
 }
 
 // Custom validation function for Latin and Cyrillic characters

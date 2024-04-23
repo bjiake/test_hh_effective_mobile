@@ -9,7 +9,7 @@ import (
 	"log"
 )
 
-func (s service) CreateCar(ctx context.Context, car domain.Car) (*domain.Car, error) {
+func (s service) CreateCar(ctx context.Context, car domain.Car) (*domain.RequestCar, error) {
 	if err := car.Validate(); err != nil {
 		log.Println(err.Error())
 		return nil, err

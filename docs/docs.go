@@ -208,6 +208,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/car/{regNum}": {
+            "get": {
+                "description": "Get a car by its registration number",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Car"
+                ],
+                "summary": "Get a car by registration number",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Registration number of the car",
+                        "name": "regNum",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/hh_ru_pkg_domain.Car"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    }
+                }
+            }
+        },
         "/people": {
             "get": {
                 "description": "Get a list of people with optional filtering",
@@ -404,7 +448,6 @@ const docTemplate = `{
         "hh_ru_pkg_domain.Car": {
             "type": "object",
             "required": [
-                "id",
                 "mark",
                 "model",
                 "owner",
@@ -434,9 +477,7 @@ const docTemplate = `{
                 },
                 "year": {
                     "description": "Year is the year of manufacture of the car",
-                    "type": "integer",
-                    "maximum": 2024,
-                    "minimum": 1900
+                    "type": "integer"
                 }
             }
         },
@@ -469,9 +510,6 @@ const docTemplate = `{
         },
         "hh_ru_pkg_domain.UpdateCar": {
             "type": "object",
-            "required": [
-                "id"
-            ],
             "properties": {
                 "domain": {
                     "type": "string"
@@ -489,9 +527,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "year": {
-                    "type": "integer",
-                    "maximum": 2024,
-                    "minimum": 1900
+                    "type": "integer"
                 }
             }
         },

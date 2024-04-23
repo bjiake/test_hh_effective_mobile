@@ -6,11 +6,21 @@ import (
 	"hh.ru/pkg/domain"
 )
 
-func (s service) GetCar(ctx context.Context, filter *filter.Car) ([]domain.Car, error) {
-	cars, err := s.repoCar.Get(ctx, filter)
+func (s service) GetCarByRegNum(ctx context.Context, regNum string) (*domain.RequestCar, error) {
+	car, err := s.repoCar.GetByRegNum(ctx, regNum)
 	if err != nil {
 		return nil, err
 	}
+
+	return car, nil
+}
+
+func (s service) GetCar(ctx context.Context, filterI *filter.Car) ([]domain.RequestCar, error) {
+	cars, err := s.repoCar.Get(ctx, filterI)
+	if err != nil {
+		return nil, err
+	}
+
 	return cars, nil
 }
 

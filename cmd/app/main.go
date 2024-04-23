@@ -13,17 +13,7 @@ import (
 // @host localhost:3000
 // @BasePath /
 func main() {
-	//db := repo.ConnectToBD()
-	//defer repo.CloseDB(db)
 
-	//ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
-	//defer cancel()
-
-	//carRepository := car.NewPgSqlCarRepository(db)
-	//app.RunCarRepositoryDemo(context.Background(), *carRepository)
-	//peopleRepository := people.NewPgSqlPeopleRepository(db)
-	//app.RunPeopleRepositoryDemo(context.Background(), peopleRepository)
-	//router.App(db)
 	cfg, configErr := config.LoadConfig()
 	if configErr != nil {
 		log.Fatal("cannot load config: ", configErr)

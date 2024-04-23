@@ -8,10 +8,11 @@ import (
 
 type ServiceUseCase interface {
 	// Car func
-	CreateCar(ctx context.Context, car domain.Car) (*domain.Car, error)
+	GetCarByRegNum(ctx context.Context, regNum string) (*domain.RequestCar, error)
+	GetCar(ctx context.Context, filter *filter.Car) ([]domain.RequestCar, error)
+	CreateCar(ctx context.Context, car domain.Car) (*domain.RequestCar, error)
 	DeleteCar(ctx context.Context, id int64) error
-	GetCar(ctx context.Context, filter *filter.Car) ([]domain.Car, error)
-	UpdateCar(ctx context.Context, uCar domain.UpdateCar) (*domain.Car, error)
+	UpdateCar(ctx context.Context, uCar domain.UpdateCar) (*domain.RequestCar, error)
 	// People func
 	CreatePeople(ctx context.Context, people domain.People) (*domain.People, error)
 	DeletePeople(ctx context.Context, id int64) error

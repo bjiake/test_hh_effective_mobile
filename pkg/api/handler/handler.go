@@ -7,6 +7,7 @@ import (
 	services "hh.ru/pkg/service/interface"
 	"log"
 	"net/http"
+	"regexp"
 	"strconv"
 )
 
@@ -18,6 +19,40 @@ func NewHandler(service services.ServiceUseCase) *Handler {
 	return &Handler{
 		service: service,
 	}
+}
+
+// GetCarByRegNum returns a car by registration number
+// @Summary Get a car by registration number
+// @Description Get a car by its registration number
+// @Tags Car
+// @Accept  json
+// @Produce  json
+// @Param   regNum path     string true "Registration number of the car"
+// @Success 200 {object} domain.Car "OK"
+// @Failure 400 {object} gin.H "Bad Request"
+// @Failure 500 {object} gin.H "Internal Server Error"
+// @Router /car/{regNum} [get]
+func (h *Handler) GetCarByRegNum(c *gin.Context) {
+	paramsRegNum := c.Param("regNum")
+	if paramsRegNum == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "params regNum can't be empty"})
+		log.Println("params regNum can't be empty")
+		return
+	}
+
+	_, err := regexp.MatchString(`^[A-ZА-Я]\d{3}[A-ZА-Я]{2}\d{3}$`, paramsRegNum)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid params regNum"})
+		log.Println("invalid params regNum")
+		return
+	}
+
+	car, err := h.service.GetCarByRegNum(c.Request.Context(), paramsRegNum)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, car)
 }
 
 // GetCar godoc

@@ -1,10 +1,10 @@
 package api
 
 import (
-	//_ "github.com/bjiake/test_hh_effective_mobile/cmd/docs"
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	_ "hh.ru/docs"
 	"hh.ru/pkg/api/handler"
 )
 
@@ -19,9 +19,11 @@ func NewServerHTTP(userHandler *handler.Handler) *ServerHTTP {
 	engine.Use(gin.Logger())
 
 	// Swagger docs
+	// to build swagger for me :) C:\Users\suyd\go\bin\swag init  --parseDependency -g ./cmd/app/main.go
 	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	//Car methods
+	engine.GET("info/:regNum", userHandler.GetCarByRegNum)
 	engine.GET("car", userHandler.GetCar)
 	engine.PUT("car", userHandler.UpdateCar)
 	engine.POST("car", userHandler.CreateCar)
