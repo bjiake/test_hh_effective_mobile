@@ -1,0 +1,513 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API Server for test work",
+        "title": "hh.ru/test/mobile",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:3000",
+    "basePath": "/",
+    "paths": {
+        "/car": {
+            "get": {
+                "description": "Get a list of cars with optional filtering",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Car"
+                ],
+                "summary": "Get cars",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filter by registration number",
+                        "name": "regNum",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by car mark (brand)",
+                        "name": "mark",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by car model",
+                        "name": "model",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Filter by car year",
+                        "name": "year",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Filter by owner ID",
+                        "name": "owner",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/hh_ru_pkg_domain.Car"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update an existing car with the provided data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Car"
+                ],
+                "summary": "Update a car",
+                "parameters": [
+                    {
+                        "description": "Car update data",
+                        "name": "car",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/hh_ru_pkg_domain.UpdateCar"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/hh_ru_pkg_domain.Car"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new car with the provided data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Car"
+                ],
+                "summary": "Create a new car",
+                "parameters": [
+                    {
+                        "description": "Car data",
+                        "name": "car",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/hh_ru_pkg_domain.Car"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/hh_ru_pkg_domain.Car"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/car/{id}": {
+            "delete": {
+                "description": "Delete a car by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Car"
+                ],
+                "summary": "Delete a car",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Car ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/people": {
+            "get": {
+                "description": "Get a list of people with optional filtering",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "People"
+                ],
+                "summary": "Get people",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Filter by ID",
+                        "name": "id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by name",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by surname",
+                        "name": "surName",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by patronymic",
+                        "name": "patronymic",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/hh_ru_pkg_domain.People"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update an existing person with the provided data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "People"
+                ],
+                "summary": "Update a person",
+                "parameters": [
+                    {
+                        "description": "Person update data",
+                        "name": "people",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/hh_ru_pkg_domain.UpdatePeople"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/hh_ru_pkg_domain.People"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new person with the provided data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "People"
+                ],
+                "summary": "Create a new person",
+                "parameters": [
+                    {
+                        "description": "Person data",
+                        "name": "people",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/hh_ru_pkg_domain.People"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/hh_ru_pkg_domain.People"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/people/{id}": {
+            "delete": {
+                "description": "Delete a person by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "People"
+                ],
+                "summary": "Delete a person",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Person ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "gin.H": {
+            "type": "object",
+            "additionalProperties": {}
+        },
+        "hh_ru_pkg_domain.Car": {
+            "type": "object",
+            "required": [
+                "id",
+                "mark",
+                "model",
+                "owner",
+                "regNum",
+                "year"
+            ],
+            "properties": {
+                "id": {
+                    "description": "ID is the unique identifier of the car",
+                    "type": "integer"
+                },
+                "mark": {
+                    "description": "Mark is the brand of the car",
+                    "type": "string"
+                },
+                "model": {
+                    "description": "Model is the model of the car",
+                    "type": "string"
+                },
+                "owner": {
+                    "description": "Owner is the ID of the car's owner",
+                    "type": "integer"
+                },
+                "regNum": {
+                    "description": "RegNum is the registration number of the car",
+                    "type": "string"
+                },
+                "year": {
+                    "description": "Year is the year of manufacture of the car",
+                    "type": "integer",
+                    "maximum": 2024,
+                    "minimum": 1900
+                }
+            }
+        },
+        "hh_ru_pkg_domain.People": {
+            "type": "object",
+            "required": [
+                "id",
+                "name",
+                "patronymic",
+                "surName"
+            ],
+            "properties": {
+                "id": {
+                    "description": "ID is the unique identifier of the people",
+                    "type": "integer"
+                },
+                "name": {
+                    "description": "Name is the name of the people",
+                    "type": "string"
+                },
+                "patronymic": {
+                    "description": "Patronymic is the patronymic of the people",
+                    "type": "string"
+                },
+                "surName": {
+                    "description": "SurName is the surname of the people",
+                    "type": "string"
+                }
+            }
+        },
+        "hh_ru_pkg_domain.UpdateCar": {
+            "type": "object",
+            "required": [
+                "id"
+            ],
+            "properties": {
+                "domain": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "mark": {
+                    "type": "string"
+                },
+                "owner": {
+                    "type": "integer"
+                },
+                "regNum": {
+                    "type": "string"
+                },
+                "year": {
+                    "type": "integer",
+                    "maximum": 2024,
+                    "minimum": 1900
+                }
+            }
+        },
+        "hh_ru_pkg_domain.UpdatePeople": {
+            "type": "object",
+            "required": [
+                "id"
+            ],
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "patronymic": {
+                    "type": "string"
+                },
+                "surName": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

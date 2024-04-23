@@ -1,0 +1,345 @@
+basePath: /
+definitions:
+  gin.H:
+    additionalProperties: {}
+    type: object
+  hh_ru_pkg_domain.Car:
+    properties:
+      id:
+        description: ID is the unique identifier of the car
+        type: integer
+      mark:
+        description: Mark is the brand of the car
+        type: string
+      model:
+        description: Model is the model of the car
+        type: string
+      owner:
+        description: Owner is the ID of the car's owner
+        type: integer
+      regNum:
+        description: RegNum is the registration number of the car
+        type: string
+      year:
+        description: Year is the year of manufacture of the car
+        maximum: 2024
+        minimum: 1900
+        type: integer
+    required:
+    - id
+    - mark
+    - model
+    - owner
+    - regNum
+    - year
+    type: object
+  hh_ru_pkg_domain.People:
+    properties:
+      id:
+        description: ID is the unique identifier of the people
+        type: integer
+      name:
+        description: Name is the name of the people
+        type: string
+      patronymic:
+        description: Patronymic is the patronymic of the people
+        type: string
+      surName:
+        description: SurName is the surname of the people
+        type: string
+    required:
+    - id
+    - name
+    - patronymic
+    - surName
+    type: object
+  hh_ru_pkg_domain.UpdateCar:
+    properties:
+      domain:
+        type: string
+      id:
+        type: integer
+      mark:
+        type: string
+      owner:
+        type: integer
+      regNum:
+        type: string
+      year:
+        maximum: 2024
+        minimum: 1900
+        type: integer
+    required:
+    - id
+    type: object
+  hh_ru_pkg_domain.UpdatePeople:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      patronymic:
+        type: string
+      surName:
+        type: string
+    required:
+    - id
+    type: object
+host: localhost:3000
+info:
+  contact: {}
+  description: API Server for test work
+  title: hh.ru/test/mobile
+  version: "1.0"
+paths:
+  /car:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of cars with optional filtering
+      parameters:
+      - description: Filter by registration number
+        in: query
+        name: regNum
+        type: string
+      - description: Filter by car mark (brand)
+        in: query
+        name: mark
+        type: string
+      - description: Filter by car model
+        in: query
+        name: model
+        type: string
+      - description: Filter by car year
+        in: query
+        name: year
+        type: integer
+      - description: Filter by owner ID
+        in: query
+        name: owner
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/hh_ru_pkg_domain.Car'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Get cars
+      tags:
+      - Car
+    post:
+      consumes:
+      - application/json
+      description: Create a new car with the provided data
+      parameters:
+      - description: Car data
+        in: body
+        name: car
+        required: true
+        schema:
+          $ref: '#/definitions/hh_ru_pkg_domain.Car'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/hh_ru_pkg_domain.Car'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Create a new car
+      tags:
+      - Car
+    put:
+      consumes:
+      - application/json
+      description: Update an existing car with the provided data
+      parameters:
+      - description: Car update data
+        in: body
+        name: car
+        required: true
+        schema:
+          $ref: '#/definitions/hh_ru_pkg_domain.UpdateCar'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/hh_ru_pkg_domain.Car'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Update a car
+      tags:
+      - Car
+  /car/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a car by ID
+      parameters:
+      - description: Car ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - text/plain
+      responses:
+        "204":
+          description: No Content
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Delete a car
+      tags:
+      - Car
+  /people:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of people with optional filtering
+      parameters:
+      - description: Filter by ID
+        in: query
+        name: id
+        type: integer
+      - description: Filter by name
+        in: query
+        name: name
+        type: string
+      - description: Filter by surname
+        in: query
+        name: surName
+        type: string
+      - description: Filter by patronymic
+        in: query
+        name: patronymic
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/hh_ru_pkg_domain.People'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Get people
+      tags:
+      - People
+    post:
+      consumes:
+      - application/json
+      description: Create a new person with the provided data
+      parameters:
+      - description: Person data
+        in: body
+        name: people
+        required: true
+        schema:
+          $ref: '#/definitions/hh_ru_pkg_domain.People'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/hh_ru_pkg_domain.People'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Create a new person
+      tags:
+      - People
+    put:
+      consumes:
+      - application/json
+      description: Update an existing person with the provided data
+      parameters:
+      - description: Person update data
+        in: body
+        name: people
+        required: true
+        schema:
+          $ref: '#/definitions/hh_ru_pkg_domain.UpdatePeople'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/hh_ru_pkg_domain.People'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Update a person
+      tags:
+      - People
+  /people/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a person by ID
+      parameters:
+      - description: Person ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - text/plain
+      responses:
+        "204":
+          description: No Content
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Delete a person
+      tags:
+      - People
+swagger: "2.0"

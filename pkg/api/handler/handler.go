@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"github.com/gin-gonic/gin"
+	gin "github.com/gin-gonic/gin"
 	"hh.ru/pkg/api/filter"
 	"hh.ru/pkg/domain"
 	services "hh.ru/pkg/service/interface"
@@ -32,8 +32,8 @@ func NewHandler(service services.ServiceUseCase) *Handler {
 // @Param year query integer false "Filter by car year"
 // @Param owner query integer false "Filter by owner ID"
 // @Success 200 {array} domain.Car "OK"
-// @Failure 400 {object} github.com/gin-gonic/gin.H "Bad Request"
-// @Failure 500 {object} github.com/gin-gonic/gin.H "Internal Server Error"
+// @Failure 400 {object} gin.H "Bad Request"
+// @Failure 500 {object} gin.H "Internal Server Error"
 // @Router /car [get]
 func (h *Handler) GetCar(c *gin.Context) {
 	var filterI filter.Car
@@ -57,7 +57,7 @@ func (h *Handler) GetCar(c *gin.Context) {
 // @Produce json
 // @Param car body domain.Car true "Car data"
 // @Success 201 {object} domain.Car "Created"
-// @Failure 400 {object} github.com/gin-gonic/gin.H "Bad Request"
+// @Failure 400 {object} gin.H "Bad Request"
 // @Failure 500 {object} string "Internal Server Error"
 // @Router /car [post]
 func (h *Handler) CreateCar(c *gin.Context) {
@@ -86,7 +86,7 @@ func (h *Handler) CreateCar(c *gin.Context) {
 // @Produce json
 // @Param car body domain.UpdateCar true "Car update data"
 // @Success 200 {object} domain.Car "OK"
-// @Failure 400 {object} github.com/gin-gonic/gin.H "Bad Request"
+// @Failure 400 {object} gin.H "Bad Request"
 // @Failure 500 {object} string "Internal Server Error"
 // @Router /car [put]
 func (h *Handler) UpdateCar(c *gin.Context) {
@@ -145,8 +145,8 @@ func (h *Handler) DeleteCar(c *gin.Context) {
 // @Param surName query string false "Filter by surname"
 // @Param patronymic query string false "Filter by patronymic"
 // @Success 200 {array} domain.People "OK"
-// @Failure 400 {object} github.com/gin-gonic/gin.H "Bad Request"
-// @Failure 500 {object} github.com/gin-gonic/gin.H "Internal Server Error"
+// @Failure 400 {object} gin.H "Bad Request"
+// @Failure 500 {object} gin.H "Internal Server Error"
 // @Router /people [get]
 func (h *Handler) GetPeople(c *gin.Context) {
 	var filterI filter.People
@@ -172,7 +172,7 @@ func (h *Handler) GetPeople(c *gin.Context) {
 // @Produce json
 // @Param people body domain.People true "Person data"
 // @Success 201 {object} domain.People "Created"
-// @Failure 400 {object} github.com/gin-gonic/gin.H "Bad Request"
+// @Failure 400 {object} gin.H "Bad Request"
 // @Failure 500 {object} string "Internal Server Error"
 // @Router /people [post]
 func (h *Handler) CreatePeople(c *gin.Context) {
@@ -201,7 +201,7 @@ func (h *Handler) CreatePeople(c *gin.Context) {
 // @Produce json
 // @Param people body domain.UpdatePeople true "Person update data"
 // @Success 200 {object} domain.People "OK"
-// @Failure 400 {object} github.com/gin-gonic/gin.H "Bad Request"
+// @Failure 400 {object} gin.H "Bad Request"
 // @Failure 500 {object} string "Internal Server Error"
 // @Router /people [put]
 func (h *Handler) UpdatePeople(c *gin.Context) {
