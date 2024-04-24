@@ -15,7 +15,7 @@ import (
 func (s service) UpdateCar(ctx context.Context, uCar domain.UpdateCar) (*domain.RequestCar, error) {
 	// find car object
 	filterI := filter.Car{ID: &uCar.ID}
-	temp, err := s.GetCar(ctx, &filterI)
+	temp, err := s.GetCar(ctx, &filterI, &filter.Pagination{})
 	if err != nil {
 		return nil, err
 	}

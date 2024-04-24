@@ -102,7 +102,7 @@ func (r *carDatabase) GetByRegNum(ctx context.Context, regNum string) (*domain.R
 	return requestCar, nil
 }
 
-func (r *carDatabase) Get(ctx context.Context, filter *filter.Car) ([]domain.RequestCar, error) {
+func (r *carDatabase) Get(ctx context.Context, filter *filter.Car, pagination *filter.Pagination) ([]domain.RequestCar, error) {
 	query := "SELECT * FROM car"
 	var args []interface{}
 
@@ -135,6 +135,18 @@ func (r *carDatabase) Get(ctx context.Context, filter *filter.Car) ([]domain.Req
 
 		if len(whereClauses) > 0 {
 			query += " WHERE " + strings.Join(whereClauses, " AND ")
+		}
+	}
+
+	// Apply pagination
+	if pagination != nil {
+		if pagination.Limit > 0 {
+			args = append(args, pagination.Limit)
+			query += fmt.Sprintf(" LIMIT $%d", len(args))
+		}
+		if pagination.Offset > 0 {
+			args = append(args, pagination.Offset)
+			query += fmt.Sprintf(" OFFSET $%d", len(args))
 		}
 	}
 

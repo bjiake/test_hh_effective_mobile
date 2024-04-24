@@ -57,26 +57,34 @@ func (h *Handler) GetCarByRegNum(c *gin.Context) {
 
 // GetCar godoc
 // @Summary Get cars
-// @Description Get a list of cars with optional filtering
+// @Description get cars by filter and with pagination
 // @Tags Car
-// @Accept json
-// @Produce json
-// @Param regNum query string false "Filter by registration number"
-// @Param mark query string false "Filter by car mark (brand)"
-// @Param model query string false "Filter by car model"
-// @Param year query integer false "Filter by car year"
-// @Param owner query integer false "Filter by owner ID"
-// @Success 200 {array} domain.Car "OK"
-// @Failure 400 {object} gin.H "Bad Request"
-// @Failure 500 {object} gin.H "Internal Server Error"
-// @Router /car [get]
+// @Accept  json
+// @Produce  json
+// @Param   limit   query    int     false  "Limit"   minimum(0)
+// @Param   offset  query    int     false  "Offset"  minimum(1)
+// @Param   id      query    int     false  "ID of the car"
+// @Param   regNum  query    string  false  "Registration number of the car"
+// @Param   mark    query    string  false  "Brand of the car"
+// @Param   model   query    string  false  "Model of the car"
+// @Param   year    query    int     false  "Year of the car"
+// @Param   owner   query    int     false  "Owner ID of the car"
+// @Success 200 {object} gin.H "Successful retrieval of cars"
+// @Failure 400 {object} gin.H "Error: Bad Request"
+// @Failure 500 {object} gin.H "Error: Internal Server Error"
+// @Router /cars [get]
 func (h *Handler) GetCar(c *gin.Context) {
 	var filterI filter.Car
 	if err := c.BindQuery(&filterI); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error bind Get filter": err.Error()})
 		return
 	}
-	cars, err := h.service.GetCar(c.Request.Context(), &filterI)
+	var paginationI filter.Pagination
+	if err := c.BindQuery(&paginationI); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error bind Get pagination": err.Error()})
+		return
+	}
+	cars, err := h.service.GetCar(c.Request.Context(), &filterI, &paginationI)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -240,13 +248,13 @@ func (h *Handler) CreatePeople(c *gin.Context) {
 // @Failure 500 {object} string "Internal Server Error"
 // @Router /people [put]
 func (h *Handler) UpdatePeople(c *gin.Context) {
-	var updateCar domain.UpdatePeople
-	if err := c.BindJSON(&updateCar); err != nil {
+	var updatePeople domain.UpdatePeople
+	if err := c.BindJSON(&updatePeople); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error update": err.Error()})
 		log.Println(err.Error())
 		return
 	}
-	car, err := h.service.UpdatePeople(c.Request.Context(), updateCar)
+	car, err := h.service.UpdatePeople(c.Request.Context(), updatePeople)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		log.Println(err.Error())

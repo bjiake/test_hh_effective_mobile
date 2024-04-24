@@ -9,7 +9,7 @@ import (
 type ServiceUseCase interface {
 	// Car func
 	GetCarByRegNum(ctx context.Context, regNum string) (*domain.RequestCar, error)
-	GetCar(ctx context.Context, filter *filter.Car) ([]domain.RequestCar, error)
+	GetCar(ctx context.Context, filter *filter.Car, pagination *filter.Pagination) ([]domain.RequestCar, error)
 	CreateCar(ctx context.Context, car domain.Car) (*domain.RequestCar, error)
 	DeleteCar(ctx context.Context, id int64) error
 	UpdateCar(ctx context.Context, uCar domain.UpdateCar) (*domain.RequestCar, error)

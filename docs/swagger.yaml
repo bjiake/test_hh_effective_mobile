@@ -86,51 +86,6 @@ info:
   version: "1.0"
 paths:
   /car:
-    get:
-      consumes:
-      - application/json
-      description: Get a list of cars with optional filtering
-      parameters:
-      - description: Filter by registration number
-        in: query
-        name: regNum
-        type: string
-      - description: Filter by car mark (brand)
-        in: query
-        name: mark
-        type: string
-      - description: Filter by car model
-        in: query
-        name: model
-        type: string
-      - description: Filter by car year
-        in: query
-        name: year
-        type: integer
-      - description: Filter by owner ID
-        in: query
-        name: owner
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/hh_ru_pkg_domain.Car'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/gin.H'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/gin.H'
-      summary: Get cars
-      tags:
-      - Car
     post:
       consumes:
       - application/json
@@ -241,6 +196,64 @@ paths:
       summary: Get a car by registration number
       tags:
       - Car
+  /cars:
+    get:
+      consumes:
+      - application/json
+      description: get cars by filter and with pagination
+      parameters:
+      - description: Limit
+        in: query
+        minimum: 1
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        minimum: 1
+        name: offset
+        type: integer
+      - description: ID of the car
+        in: query
+        name: id
+        type: integer
+      - description: Registration number of the car
+        in: query
+        name: regNum
+        type: string
+      - description: Brand of the car
+        in: query
+        name: mark
+        type: string
+      - description: Model of the car
+        in: query
+        name: model
+        type: string
+      - description: Year of the car
+        in: query
+        name: year
+        type: integer
+      - description: Owner ID of the car
+        in: query
+        name: owner
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful retrieval of cars
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: 'Error: Bad Request'
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: 'Error: Internal Server Error'
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Get cars
+      tags:
+      - cars
   /people:
     get:
       consumes:

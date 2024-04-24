@@ -15,8 +15,8 @@ func (s service) GetCarByRegNum(ctx context.Context, regNum string) (*domain.Req
 	return car, nil
 }
 
-func (s service) GetCar(ctx context.Context, filterI *filter.Car) ([]domain.RequestCar, error) {
-	cars, err := s.repoCar.Get(ctx, filterI)
+func (s service) GetCar(ctx context.Context, filterI *filter.Car, pagination *filter.Pagination) ([]domain.RequestCar, error) {
+	cars, err := s.repoCar.Get(ctx, filterI, pagination)
 	if err != nil {
 		return nil, err
 	}
